@@ -33,10 +33,23 @@ function App() {
     return [...Array(9).keys()];
   };
 
+  const isFirstMove =() =>{
+    let output = true
+    state.board.forEach((value, index)=>{
+      if(['O','X'].includes(value)) output = false
+    })
+    return output
+  }
+
+
   useEffect(() => {
     processGameNotification();
 
-    if (ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
+    if((stage == 3 && !state.playFirst && state.opponent != 'h' && isFirstMove()))
+        setState({...state, currrentSymbol: 'O'})
+
+    console.log(isFirstMove());
+    if ( ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
       setModal({
         show: true,
         showButton: false,
@@ -52,6 +65,12 @@ function App() {
           show: false,
           showButton: false,
           value: "",
+        });
+      }).catch(err=>{
+        setModal({
+          show: true,
+          showButton: false,
+          value: "Error getting computer's move",
         });
       });
     }
@@ -127,7 +146,9 @@ function App() {
       };
     },
     2: (userInput) => {
-      return { ...state, playFirst: userInput === "y" };
+      return { ...state, playFirst: userInput === "y", 
+      // currentSymbol: userInput === "y" ? 'X' : 'O' 
+    };
     },
   };
 
