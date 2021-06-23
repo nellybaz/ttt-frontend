@@ -15,7 +15,9 @@ export default function Modal(props) {
       }}
     >
       <h4>{props.value}</h4>
-      <Button label="OK" onClick={props.onClick} />
+      {
+        props.showButton && <Button label="OK" onClick={props.onClick} />
+      }
     </div>
   );
 }

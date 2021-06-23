@@ -7,7 +7,11 @@ import { ComputerMove } from "./actions/ComputerMoves";
 import { GameRules } from "./actions/GameRules";
 
 function App() {
-  const [modalValue, setModalValue] = useState("");
+  const [modal, setModal] = useState({
+    show: false,
+    showButton: false,
+    value: "",
+  });
   const [showNotification, setShowNotification] = useState(false);
   const [stage, setStage] = useState(0);
   const [state, setState] = useState({
@@ -18,8 +22,6 @@ function App() {
     currrentSymbol: "X",
     notificationText: "Invalid response",
   });
-
-  const [showModal, setShowModal] = useState(false);
 
   const STAGEVALUE = {
     0: state.boardSize,
@@ -34,16 +36,27 @@ function App() {
   useEffect(() => {
     processGameNotification();
 
-    if (ComputerMove.isTurn(state.opponent, state.currrentSymbol))
+    if (ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
+      setModal({
+        show: true,
+        showButton: false,
+        value: "Computer is thinking...",
+      });
       ComputerMove.make(
         state.opponent,
         state.board,
         state.currrentSymbol,
         updateBoard
-      );
+      ).then((_) => {
+        setModal({
+          show: false,
+          showButton: false,
+          value: "",
+        });
+      });
+    }
   }, [stage, state.currrentSymbol]);
 
-  
   const updateBoard = async (givenIndex) => {
     const currentSymbol = state.currrentSymbol;
     const newSymbol = state.currrentSymbol === "X" ? "O" : "X";
@@ -51,12 +64,21 @@ function App() {
       index === givenIndex ? currentSymbol : item
     );
 
-    const terminal = await GameRules.isTerminalState(newBoard, currentSymbol, state.opponent);
+    setModal({
+      show: true,
+      showButton: false,
+      value: "Validating move ...",
+    });
+    const terminal = await GameRules.isTerminalState(
+      newBoard,
+      currentSymbol,
+      state.opponent
+    );
+    setModal({ show: false, showButton: false, value: "" });
 
     if (terminal.state) {
       const terminalText = `Game is a ${terminal.game_state.toUpperCase()}`;
-      setModalValue(terminalText);
-      setShowModal(true);
+      setModal({ show: true, showButton: true, value: terminalText });
       setTimeout(() => {
         setStage(0);
       }, 5000);
@@ -132,12 +154,13 @@ function App() {
         )}
       </header>
 
-      {showModal && (
+      {modal.show && (
         <Modal
-          value={modalValue}
+          value={modal.value}
+          showButton={modal.showButton}
           onClick={() => {
-            setShowModal(false);
-            // setState({ ...state, board: defaultBoard() });
+            setModal({ ...modal, show: false });
+            setState({ ...state, notificationText:'' });
           }}
         />
       )}
