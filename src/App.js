@@ -7,6 +7,14 @@ import { ComputerMove } from "./actions/ComputerMoves";
 import { GameRules } from "./actions/GameRules";
 
 function App() {
+  const INITIAL_STATE = {
+    boardSize: 0,
+    opponent: "",
+    playFirst: undefined,
+    board: [...Array(9).keys()],
+    currrentSymbol: "X",
+    notificationText: "",
+  };
   const [modal, setModal] = useState({
     show: false,
     showButton: false,
@@ -14,14 +22,7 @@ function App() {
   });
   const [showNotification, setShowNotification] = useState(false);
   const [stage, setStage] = useState(0);
-  const [state, setState] = useState({
-    boardSize: 0,
-    opponent: "",
-    playFirst: undefined,
-    board: [...Array(9).keys()],
-    currrentSymbol: "X",
-    notificationText: "Invalid response",
-  });
+  const [state, setState] = useState(INITIAL_STATE);
 
   const STAGEVALUE = {
     0: state.boardSize,
@@ -33,23 +34,27 @@ function App() {
     return [...Array(9).keys()];
   };
 
-  const isFirstMove =() =>{
-    let output = true
-    state.board.forEach((value, index)=>{
-      if(['O','X'].includes(value)) output = false
-    })
-    return output
-  }
-
+  const isFirstMove = () => {
+    let output = true;
+    state.board.forEach((value, index) => {
+      if (["O", "X"].includes(value)) output = false;
+    });
+    return output;
+  };
 
   useEffect(() => {
     processGameNotification();
 
-    if((stage == 3 && !state.playFirst && state.opponent != 'h' && isFirstMove()))
-        setState({...state, currrentSymbol: 'O'})
+    if (
+      stage == 3 &&
+      !state.playFirst &&
+      state.opponent != "h" &&
+      isFirstMove()
+    )
+      setState({ ...state, currrentSymbol: "O" });
 
     console.log(isFirstMove());
-    if ( ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
+    if (ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
       setModal({
         show: true,
         showButton: false,
@@ -60,19 +65,21 @@ function App() {
         state.board,
         state.currrentSymbol,
         updateBoard
-      ).then((_) => {
-        setModal({
-          show: false,
-          showButton: false,
-          value: "",
+      )
+        .then((_) => {
+          setModal({
+            show: false,
+            showButton: false,
+            value: "",
+          });
+        })
+        .catch((err) => {
+          setModal({
+            show: true,
+            showButton: false,
+            value: "Error getting computer's move",
+          });
         });
-      }).catch(err=>{
-        setModal({
-          show: true,
-          showButton: false,
-          value: "Error getting computer's move",
-        });
-      });
     }
   }, [stage, state.currrentSymbol]);
 
@@ -100,7 +107,9 @@ function App() {
       setModal({ show: true, showButton: true, value: terminalText });
       setTimeout(() => {
         setStage(0);
-      }, 5000);
+        setState(INITIAL_STATE);
+        setShowNotification();
+      }, 2000);
       return;
     }
 
@@ -129,9 +138,10 @@ function App() {
   };
 
   const buttonClickHandler = (_) => {
-    if (Validation.shouldShowError(stage, getStageValue(stage)))
+    if (Validation.shouldShowError(stage, getStageValue(stage))) {
+      setState({ ...state, notificationText: "Invalid response" });
       setShowNotification(true);
-    else processNextStage();
+    } else processNextStage();
   };
 
   const inputHandlerDataHash = {
@@ -146,9 +156,11 @@ function App() {
       };
     },
     2: (userInput) => {
-      return { ...state, playFirst: userInput === "y", 
-      // currentSymbol: userInput === "y" ? 'X' : 'O' 
-    };
+      return {
+        ...state,
+        playFirst: userInput === "y",
+        // currentSymbol: userInput === "y" ? 'X' : 'O'
+      };
     },
   };
 
@@ -181,7 +193,7 @@ function App() {
           showButton={modal.showButton}
           onClick={() => {
             setModal({ ...modal, show: false });
-            setState({ ...state, notificationText:'' });
+            setState({ ...state, notificationText: "" });
           }}
         />
       )}
