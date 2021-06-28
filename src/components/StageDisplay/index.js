@@ -27,7 +27,7 @@ export default function StageDisplay(props){
         buttonClickHandler={props.buttonClickHandler}
       />
     ),
-    3: <Board board={props.board} clickHandler={props.updateBoard} />,
+    3: <Board board={props.board} clickHandler={props.updateBoard} lockBoard={props.lockBoard} />,
   };
 
   return (

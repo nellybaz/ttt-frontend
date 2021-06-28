@@ -1,9 +1,8 @@
-import { GameEngine } from "../services/GameEngine";
 
 export class GameRules{
-  static async isTerminalState(board, symbol, opponent){
+  static async isTerminalState(move){
     try {
-      const { game_state } = await GameEngine.move(opponent, symbol, board);
+      const { game_state } = move;
       return {
         game_state,
         state: ["win", "draw"].includes(game_state),

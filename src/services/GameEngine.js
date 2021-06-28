@@ -1,8 +1,8 @@
 import axios from "axios";
 const URL = "https://ttt-api-v111.herokuapp.com/move";
 
-export class GameEngine{
-  static async move(opponent, symbol, board){
+export class GameEngine {
+  static async move(opponent, symbol, board) {
     const type =
       opponent == "s"
         ? "smart_computer"
@@ -16,12 +16,13 @@ export class GameEngine{
       symbol: symbol,
     };
 
+    console.log({ body });
+
     try {
       const res = await axios.post(URL, body);
       return res.data;
-    }
-    catch(err){
-      throw Error("Error getting move from game engine")
+    } catch (err) {
+      throw Error("Error getting move from game engine");
     }
   }
 }

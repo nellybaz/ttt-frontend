@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Validation from "./validations";
 import { ComputerMove } from "./actions/ComputerMoves";
 import { GameRules } from "./actions/GameRules";
+import { GameEngine } from "./services/GameEngine";
 
 function App() {
   const INITIAL_STATE = {
@@ -14,7 +15,10 @@ function App() {
     board: [...Array(9).keys()],
     currrentSymbol: "X",
     notificationText: "",
+    computerNextMove:-1
   };
+
+  const [lockBoard, setLockBoard] = useState(false)
   const [modal, setModal] = useState({
     show: false,
     showButton: false,
@@ -53,37 +57,26 @@ function App() {
     )
       setState({ ...state, currrentSymbol: "O" });
 
-    console.log(isFirstMove());
     if (ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
       setModal({
         show: true,
         showButton: false,
         value: "Computer is thinking...",
       });
-      ComputerMove.make(
-        state.opponent,
-        state.board,
-        state.currrentSymbol,
-        updateBoard
-      )
-        .then((_) => {
-          setModal({
-            show: false,
-            showButton: false,
-            value: "",
-          });
-        })
-        .catch((err) => {
-          setModal({
-            show: true,
-            showButton: false,
-            value: "Error getting computer's move",
-          });
-        });
+
+      updateBoard(state.computerNextMove)
+      setModal({
+        show: false,
+        showButton: false,
+        value: "",
+      });
+      setLockBoard(false)
     }
   }, [stage, state.currrentSymbol]);
 
   const updateBoard = async (givenIndex) => {
+    setLockBoard(true)
+
     const currentSymbol = state.currrentSymbol;
     const newSymbol = state.currrentSymbol === "X" ? "O" : "X";
     const newBoard = state.board.map((item, index) =>
@@ -95,12 +88,11 @@ function App() {
       showButton: false,
       value: "Validating move ...",
     });
-    const terminal = await GameRules.isTerminalState(
-      newBoard,
-      currentSymbol,
-      state.opponent
-    );
-    setModal({ show: false, showButton: false, value: "" });
+
+    const move = await GameEngine.move(state.opponent, currentSymbol, newBoard);
+    console.log({move});
+
+    const terminal = await GameRules.isTerminalState(move);
 
     if (terminal.state) {
       const terminalText = `Game is a ${terminal.game_state.toUpperCase()}`;
@@ -113,7 +105,8 @@ function App() {
       return;
     }
 
-    setState({ ...state, board: newBoard, currrentSymbol: newSymbol });
+    setState({ ...state, board: newBoard, currrentSymbol: newSymbol, computerNextMove: move.move });
+    setModal({ show: false, showButton: false, value: "" });
   };
 
   const getStageValue = (stage) => {
@@ -181,6 +174,7 @@ function App() {
           buttonClickHandler={buttonClickHandler}
           board={state.board}
           updateBoard={updateBoard}
+          lockBoard={lockBoard}
         />
         {showNotification && (
           <small data-testid="input-error">{state.notificationText}</small>
