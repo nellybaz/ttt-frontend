@@ -98,9 +98,13 @@ function App() {
     const terminal = await GameRules.isTerminalState(move);
 
     if (terminal.state) {
-      const terminalText = getGameTerminalText();
+      const terminalText = getGameTerminalText(terminal.game_state);
       setModal({ show: true, showButton: true, value: terminalText });
       setLockButton(true);
+      setState({
+        ...state,
+        board: newBoard
+      });
       setTimeout(() => {
         setStage(0);
         setState(INITIAL_STATE);
@@ -167,7 +171,8 @@ function App() {
     },
   };
 
-  const getGameTerminalText = () => {
+  const getGameTerminalText = (state) => {
+    if(state == 'draw') return 'Game is a draw'
     const isSecondPlayer = state.currrentSymbol == "O";
     const isComputerPlayer = state.opponent != 'h'
     return isComputerPlayer && isSecondPlayer ? "Computer wins 💻" : isSecondPlayer ? "Player 2 wins" : "Player 1 wins";
