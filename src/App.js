@@ -15,10 +15,11 @@ function App() {
     board: [...Array(9).keys()],
     currrentSymbol: "X",
     notificationText: "",
-    computerNextMove:-1
+    computerNextMove: -1,
   };
 
-  const [lockBoard, setLockBoard] = useState(false)
+  const [lockBoard, setLockBoard] = useState(false);
+  const [lockButton, setLockButton] = useState(false);
   const [modal, setModal] = useState({
     show: false,
     showButton: false,
@@ -64,20 +65,20 @@ function App() {
         value: "Computer is thinking...",
       });
 
-      updateBoard(state.computerNextMove)
+      updateBoard(state.computerNextMove);
       setModal({
         show: false,
         showButton: false,
         value: "",
       });
-      setTimeout(()=>{
-        setLockBoard(false)
-      }, 2000)
+      setTimeout(() => {
+        setLockBoard(false);
+      }, 2000);
     }
   }, [stage, state.currrentSymbol]);
 
   const updateBoard = async (givenIndex) => {
-    setLockBoard(true)
+    setLockBoard(true);
 
     const currentSymbol = state.currrentSymbol;
     const newSymbol = state.currrentSymbol === "X" ? "O" : "X";
@@ -92,13 +93,14 @@ function App() {
     });
 
     const move = await GameEngine.move(state.opponent, currentSymbol, newBoard);
-    console.log({move});
+    console.log({ move });
 
     const terminal = await GameRules.isTerminalState(move);
 
     if (terminal.state) {
-      const terminalText = `Game is a ${terminal.game_state.toUpperCase()}`;
+      const terminalText = getGameTerminalText();
       setModal({ show: true, showButton: true, value: terminalText });
+      setLockButton(true);
       setTimeout(() => {
         setStage(0);
         setState(INITIAL_STATE);
@@ -107,7 +109,12 @@ function App() {
       return;
     }
 
-    setState({ ...state, board: newBoard, currrentSymbol: newSymbol, computerNextMove: move.move });
+    setState({
+      ...state,
+      board: newBoard,
+      currrentSymbol: newSymbol,
+      computerNextMove: move.move,
+    });
     setModal({ show: false, showButton: false, value: "" });
   };
 
@@ -133,6 +140,7 @@ function App() {
   };
 
   const buttonClickHandler = (_) => {
+    if (lockButton) return;
     if (Validation.shouldShowError(stage, getStageValue(stage))) {
       setState({ ...state, notificationText: "Invalid response" });
       setShowNotification(true);
@@ -157,6 +165,12 @@ function App() {
         // currentSymbol: userInput === "y" ? 'X' : 'O'
       };
     },
+  };
+
+  const getGameTerminalText = () => {
+    const isSecondPlayer = state.currrentSymbol == "O";
+    const isComputerPlayer = state.opponent != 'h'
+    return isComputerPlayer && isSecondPlayer ? "Computer wins 💻" : isSecondPlayer ? "Player 2 wins" : "Player 1 wins";
   };
 
   const inputHandler = (event) => {
@@ -190,6 +204,7 @@ function App() {
           onClick={() => {
             setModal({ ...modal, show: false });
             setState({ ...state, notificationText: "" });
+            setLockButton(false);
           }}
         />
       )}
