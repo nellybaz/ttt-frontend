@@ -70,7 +70,9 @@ function App() {
         showButton: false,
         value: "",
       });
-      setLockBoard(false)
+      setTimeout(()=>{
+        setLockBoard(false)
+      }, 2000)
     }
   }, [stage, state.currrentSymbol]);
 
