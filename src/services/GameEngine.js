@@ -3,6 +3,7 @@ const URL = "https://ttt-api-v111.herokuapp.com/move";
 
 export class GameEngine {
   static async move(opponent, symbol, board) {
+    console.log({opponent, symbol, board});
     const type =
       opponent == "s"
         ? "smart_computer"

@@ -39,14 +39,14 @@ function App() {
     return [...Array(9).keys()];
   };
 
-  const returntToGameStart=()=>{
+  const returntToGameStart = () => {
     setTimeout(() => {
       setStage(0);
       setState(INITIAL_STATE);
       setShowNotification();
       setLockBoard(false);
     }, 2000);
-  }
+  };
   const isFirstMove = () => {
     let output = true;
     state.board.forEach((value, index) => {
@@ -70,7 +70,8 @@ function App() {
         showButton: false,
         value: "Computer is thinking...",
       });
-      GameEngine.move(state.opponent, state.currrentSymbol, state.board)
+      const newSymbol = state.currrentSymbol === "X" ? "O" : "X";
+      GameEngine.move(state.opponent, newSymbol, state.board)
         .then((move) => {
           setState({
             ...state,
@@ -85,7 +86,7 @@ function App() {
             showButton: false,
             value: "Error getting computer move 😔",
           });
-          returntToGameStart()
+          returntToGameStart();
         });
     }
 
@@ -112,7 +113,7 @@ function App() {
     }
   }, [stage, state.currrentSymbol]);
 
-  const updateBoard = async (givenIndex, computerCalled=false) => {
+  const updateBoard = async (givenIndex, computerCalled = false) => {
     if (computerShouldGoFirst() && !computerCalled) return;
     setLockBoard(true);
 
@@ -128,7 +129,7 @@ function App() {
       value: "Validating move ...",
     });
 
-    const move = await GameEngine.move(state.opponent, currentSymbol, newBoard);
+    const move = await GameEngine.move(state.opponent, newSymbol, newBoard);
 
     const terminal = await GameRules.isTerminalState(move);
 
@@ -140,7 +141,7 @@ function App() {
         ...state,
         board: newBoard,
       });
-      returntToGameStart()
+      returntToGameStart();
       return;
     }
 
