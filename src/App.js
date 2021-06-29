@@ -74,6 +74,10 @@ function App() {
       setTimeout(() => {
         setLockBoard(false);
       }, 2000);
+    } else {
+      setTimeout(() => {
+        setLockBoard(false);
+      }, 2000);
     }
   }, [stage, state.currrentSymbol]);
 
@@ -93,7 +97,6 @@ function App() {
     });
 
     const move = await GameEngine.move(state.opponent, currentSymbol, newBoard);
-    console.log({ move });
 
     const terminal = await GameRules.isTerminalState(move);
 
@@ -103,12 +106,13 @@ function App() {
       setLockButton(true);
       setState({
         ...state,
-        board: newBoard
+        board: newBoard,
       });
       setTimeout(() => {
         setStage(0);
         setState(INITIAL_STATE);
         setShowNotification();
+        setLockBoard(false);
       }, 2000);
       return;
     }
@@ -171,11 +175,15 @@ function App() {
     },
   };
 
-  const getGameTerminalText = (state) => {
-    if(state == 'draw') return 'Game is a draw'
+  const getGameTerminalText = (terminalState) => {
+    if (terminalState == "draw") return "Game is a draw";
     const isSecondPlayer = state.currrentSymbol == "O";
-    const isComputerPlayer = state.opponent != 'h'
-    return isComputerPlayer && isSecondPlayer ? "Computer wins 💻" : isSecondPlayer ? "Player 2 wins" : "Player 1 wins";
+    const isComputerPlayer = state.opponent != "h";
+    return isComputerPlayer && isSecondPlayer
+      ? "Computer wins 💻"
+      : isSecondPlayer
+      ? "Player 2 wins"
+      : "Player 1 wins";
   };
 
   const inputHandler = (event) => {

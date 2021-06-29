@@ -16,8 +16,6 @@ export class GameEngine {
       symbol: symbol,
     };
 
-    console.log({ body });
-
     try {
       const res = await axios.post(URL, body);
       return res.data;

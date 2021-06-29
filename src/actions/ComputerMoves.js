@@ -2,8 +2,6 @@ import { GameEngine } from "../services/GameEngine";
 
 export class ComputerMove {
   static async make(opponent, board, currentSymbol,  callback){
-      console.log({board});
-      // if()
       const res = await GameEngine.move(opponent, currentSymbol, board);
       const computer_move = res["move"];
       callback(computer_move);
