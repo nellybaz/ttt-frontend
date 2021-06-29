@@ -39,6 +39,14 @@ function App() {
     return [...Array(9).keys()];
   };
 
+  const returntToGameStart=()=>{
+    setTimeout(() => {
+      setStage(0);
+      setState(INITIAL_STATE);
+      setShowNotification();
+      setLockBoard(false);
+    }, 2000);
+  }
   const isFirstMove = () => {
     let output = true;
     state.board.forEach((value, index) => {
@@ -47,16 +55,39 @@ function App() {
     return output;
   };
 
+  const computerShouldGoFirst = () => {
+    return (
+      stage === 3 && !state.playFirst && state.opponent !== "h" && isFirstMove()
+    );
+  };
   useEffect(() => {
     processGameNotification();
 
-    if (
-      stage == 3 &&
-      !state.playFirst &&
-      state.opponent != "h" &&
-      isFirstMove()
-    )
-      setState({ ...state, currrentSymbol: "O" });
+    if (computerShouldGoFirst()) {
+      setLockBoard(true);
+      setModal({
+        show: true,
+        showButton: false,
+        value: "Computer is thinking...",
+      });
+      GameEngine.move(state.opponent, state.currrentSymbol, state.board)
+        .then((move) => {
+          setState({
+            ...state,
+            currrentSymbol: "O",
+            computerNextMove: move.move,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          setModal({
+            show: true,
+            showButton: false,
+            value: "Error getting computer move 😔",
+          });
+          returntToGameStart()
+        });
+    }
 
     if (ComputerMove.isTurn(state.opponent, state.currrentSymbol)) {
       setModal({
@@ -82,6 +113,7 @@ function App() {
   }, [stage, state.currrentSymbol]);
 
   const updateBoard = async (givenIndex) => {
+    if (computerShouldGoFirst()) return;
     setLockBoard(true);
 
     const currentSymbol = state.currrentSymbol;
@@ -108,12 +140,7 @@ function App() {
         ...state,
         board: newBoard,
       });
-      setTimeout(() => {
-        setStage(0);
-        setState(INITIAL_STATE);
-        setShowNotification();
-        setLockBoard(false);
-      }, 2000);
+      returntToGameStart()
       return;
     }
 
