@@ -114,6 +114,10 @@ function App() {
   }, [stage, state.currrentSymbol]);
 
   const updateBoard = async (givenIndex, computerCalled = false) => {
+    if(["O", "X"].includes(state.board[givenIndex])) {
+      setState({ ...state, notificationText: "Invalid move" });
+      return 
+    } 
     if (computerShouldGoFirst() && !computerCalled) return;
     setLockBoard(true);
 
