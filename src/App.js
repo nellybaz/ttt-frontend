@@ -96,7 +96,7 @@ function App() {
         value: "Computer is thinking...",
       });
 
-      updateBoard(state.computerNextMove);
+      updateBoard(state.computerNextMove, true);
       setModal({
         show: false,
         showButton: false,
@@ -112,8 +112,8 @@ function App() {
     }
   }, [stage, state.currrentSymbol]);
 
-  const updateBoard = async (givenIndex) => {
-    if (computerShouldGoFirst()) return;
+  const updateBoard = async (givenIndex, computerCalled=false) => {
+    if (computerShouldGoFirst() && !computerCalled) return;
     setLockBoard(true);
 
     const currentSymbol = state.currrentSymbol;
